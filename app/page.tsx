@@ -1,8 +1,10 @@
-const Home = async () => {
+import { UsersOverview } from '@/features/users/components/users-overview/users-overview';
+
+const Home = () => {
     return (
-        <>
-            <div>Home</div>
-        </>
+        <div className="container mx-auto py-4">
+            <UsersOverview />
+        </div>
     );
 };
 
