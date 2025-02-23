@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getPaginatedUsers } from '@/lib/actions/users';
+import { getPaginatedUsers } from '@/actions/users';
 
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);

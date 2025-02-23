@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { UserTableRecord } from '@/features/users/types/user';
 import { UserTable } from './user-table/user-table';
 import { TableLayout } from '@/lib/components/layout/table-layout';
+import { UserAddressTable } from '@/features/users/components/users-overview/user-address-table/user-address-table';
 
 export const UsersOverview = () => {
     const [selectedUserRowData, setSelectedUserRowDara] = useState<{
@@ -34,6 +35,7 @@ export const UsersOverview = () => {
                     selectedUserRowId={selectedUserRowData?.rowId}
                     onUserClick={handleUserClick}
                 />
+                <UserAddressTable userId={selectedUserRowData?.user.id} />
             </TableLayout>
         </>
     );
