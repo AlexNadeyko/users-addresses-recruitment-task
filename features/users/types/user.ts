@@ -1,11 +1,11 @@
-import { User } from '@prisma/client';
-
 export enum UserStatus {
     ACTIVE = 'ACTIVE',
     INACTIVE = 'INACTIVE',
 }
 
-export type UserTableRecord = Pick<
-    User,
-    'id' | 'firstName' | 'lastName' | 'status' | 'email' | 'initials'
->;
+export enum AddressType {
+    HOME = 'HOME',
+    INVOICE = 'INVOICE',
+    POST = 'POST',
+    WORK = 'WORK',
+}

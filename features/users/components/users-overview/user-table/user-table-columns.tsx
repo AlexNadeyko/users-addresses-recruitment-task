@@ -9,7 +9,7 @@ import {
     USERS_STATUS_BADGE_VARIANTS,
     USERS_STATUS_LABELS,
 } from '@/features/users/constants/user-status';
-import { UserStatus, UserTableRecord } from '@/features/users/types/user';
+import { UserStatus } from '@/features/users/types/user';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,7 +18,9 @@ import {
 } from '@/lib/components/ui/dropdown-menu';
 import { Button } from '@/lib/components/ui/button';
 
-export const userTableColumns: ColumnDef<UserTableRecord>[] = [
+export const getUserTableColumns: (
+    onDeleteClick: (user: User, rowId: string) => void,
+) => ColumnDef<User>[] = (onDeleteClick) => [
     {
         accessorKey: 'firstName',
         header: 'First Name',
@@ -66,7 +68,7 @@ export const userTableColumns: ColumnDef<UserTableRecord>[] = [
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             variant="destructive"
-                            onClick={() => console.log(user.id)}
+                            onClick={() => onDeleteClick(user, row.id)}
                         >
                             Delete
                         </DropdownMenuItem>

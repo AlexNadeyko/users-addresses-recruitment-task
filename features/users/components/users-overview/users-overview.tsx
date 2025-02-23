@@ -2,18 +2,18 @@
 
 import { useState } from 'react';
 
-import { UserTableRecord } from '@/features/users/types/user';
 import { UserTable } from './user-table/user-table';
 import { TableLayout } from '@/lib/components/layout/table-layout';
 import { UserAddressTable } from '@/features/users/components/users-overview/user-address-table/user-address-table';
+import { User } from '@prisma/client';
 
 export const UsersOverview = () => {
     const [selectedUserRowData, setSelectedUserRowDara] = useState<{
-        user: UserTableRecord;
+        user: User;
         rowId: string;
     } | null>(null);
 
-    const handleUserClick = (user: UserTableRecord, rowId: string) => {
+    const handleUserClick = (user: User, rowId: string) => {
         setSelectedUserRowDara({ user, rowId });
     };
 
@@ -25,6 +25,8 @@ export const UsersOverview = () => {
         console.log('Add user clicked');
     };
 
+    const handleUserReset = () => setSelectedUserRowDara(null);
+
     return (
         <>
             <TableLayout
@@ -34,7 +36,13 @@ export const UsersOverview = () => {
                 <UserTable
                     selectedUserRowId={selectedUserRowData?.rowId}
                     onUserClick={handleUserClick}
+                    resetUser={handleUserReset}
                 />
+            </TableLayout>
+            <TableLayout
+                tableTitle="User Addresses"
+                buttonConfig={{ text: 'Add address', onClick: handleAddUserAddressClick }}
+            >
                 <UserAddressTable userId={selectedUserRowData?.user.id} />
             </TableLayout>
         </>
