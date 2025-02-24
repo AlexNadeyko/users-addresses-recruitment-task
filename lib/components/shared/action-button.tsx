@@ -1,9 +1,10 @@
-import { Button } from '@/lib/components/ui/button';
+import { Button, ButtonProps } from '@/lib/components/ui/button';
 
-export type ActionButtonProps = {
+export type ActionButtonProps = Pick<
+    ButtonProps,
+    'disabled' | 'children' | 'type' | 'className' | 'onClick'
+> & {
     isSubmitting?: boolean;
-    disabled?: boolean;
-    children?: React.ReactNode;
 };
 
 export const ActionButton = ({

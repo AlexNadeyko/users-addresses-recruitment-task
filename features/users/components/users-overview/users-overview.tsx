@@ -17,10 +17,6 @@ export const UsersOverview = () => {
         setSelectedUserRowDara({ user, rowId });
     };
 
-    const handleAddUserClick = () => {
-        console.log('Add user clicked');
-    };
-
     const handleAddUserAddressClick = () => {
         console.log('Add user clicked');
     };
@@ -29,16 +25,11 @@ export const UsersOverview = () => {
 
     return (
         <>
-            <TableLayout
-                tableTitle="Users"
-                buttonConfig={{ text: 'Add user', onClick: handleAddUserClick }}
-            >
-                <UserTable
-                    selectedUserRowId={selectedUserRowData?.rowId}
-                    onUserClick={handleUserClick}
-                    resetUser={handleUserReset}
-                />
-            </TableLayout>
+            <UserTable
+                selectedUserRowId={selectedUserRowData?.rowId}
+                onUserClick={handleUserClick}
+                resetSelectedForAddressOverviewUser={handleUserReset}
+            />
             <TableLayout
                 tableTitle="User Addresses"
                 buttonConfig={{ text: 'Add address', onClick: handleAddUserAddressClick }}

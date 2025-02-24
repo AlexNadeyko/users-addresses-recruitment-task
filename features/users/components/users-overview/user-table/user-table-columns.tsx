@@ -18,9 +18,13 @@ import {
 } from '@/lib/components/ui/dropdown-menu';
 import { Button } from '@/lib/components/ui/button';
 
-export const getUserTableColumns: (
-    onDeleteClick: (user: User, rowId: string) => void,
-) => ColumnDef<User>[] = (onDeleteClick) => [
+export const getUserTableColumns: ({
+    onEditClick,
+    onDeleteClick,
+}: {
+    onEditClick: (user: User, rowId: string) => void;
+    onDeleteClick: (user: User, rowId: string) => void;
+}) => ColumnDef<User>[] = ({ onEditClick, onDeleteClick }) => [
     {
         accessorKey: 'firstName',
         header: 'First Name',
@@ -63,7 +67,7 @@ export const getUserTableColumns: (
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => console.log(user.id)}>
+                        <DropdownMenuItem onClick={() => onEditClick(user, row.id)}>
                             Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem

@@ -3,18 +3,30 @@ import { useState } from 'react';
 export enum ActionType {
     DELETE = 'DELETE',
     UPDATE = 'UPDATE',
+    ADD = 'ADD',
 }
 
-export const useTableActions = <ActionData>() => {
-    const [actionData, setActionData] = useState<{ data: ActionData; type: ActionType } | null>(
-        null,
-    );
+export const useTableActions = <TableItem>() => {
+    const [currentTableAction, setCurrentTableAction] = useState<ActionType | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedTableItem, setSelectedTableItem] = useState<TableItem | null>(null);
 
-    const resetActionData = () => setActionData(null);
+    const cancelTableAction = () => {
+        setCurrentTableAction(null);
+        setSelectedTableItem(null);
+    };
 
     return {
-        actionData,
-        setActionData,
-        resetActionData,
+        currentTableAction,
+        selectedTableItem,
+        isSubmitting,
+        setCurrentTableAction,
+        setSelectedTableItem,
+        setIsSubmitting,
+        cancelTableAction,
+        //
+        // actionData,
+        // setActionData,
+        // resetActionData,
     };
 };

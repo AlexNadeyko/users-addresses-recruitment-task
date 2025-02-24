@@ -3,6 +3,8 @@
 import { prisma } from '@/lib/prisma';
 import { DEFAULT_PAGINATION_SIZE } from '@/lib/constants/pagination-size';
 import { AddressType } from '@/features/users/types/user';
+import { UserFormFields } from '@/features/users/schemas/user-schema';
+import { getUserInitials } from '@/features/users/utils/get-use-initials';
 
 export const getPaginatedUsers = async ({ page }: { page: number }) => {
     const [totalCount, data] = await prisma.$transaction([
@@ -38,6 +40,29 @@ export const getPaginatedUserAddresses = async ({
     ]);
 
     return { totalCount, data };
+};
+
+export const addUser = async (userFormFields: UserFormFields) => {
+    const { firstName, lastName, email } = userFormFields;
+    await prisma.user.create({
+        data: { firstName, lastName, email, initials: getUserInitials(firstName, lastName) },
+    });
+};
+
+export const updateUser = async ({
+    userId,
+    userFormFields,
+}: {
+    userId: number;
+    userFormFields: UserFormFields;
+}) => {
+    const { firstName, lastName, email } = userFormFields;
+    await prisma.user.update({
+        where: {
+            id: userId,
+        },
+        data: { firstName, lastName, email, initials: getUserInitials(firstName, lastName) },
+    });
 };
 
 export const deleteUser = async ({ userId }: { userId: number }) => {
