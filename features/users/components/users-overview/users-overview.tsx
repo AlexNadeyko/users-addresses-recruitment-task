@@ -3,7 +3,6 @@
 import { useState } from 'react';
 
 import { UserTable } from './user-table/user-table';
-import { TableLayout } from '@/lib/components/layout/table-layout';
 import { UserAddressTable } from '@/features/users/components/users-overview/user-address-table/user-address-table';
 import { User } from '@prisma/client';
 
@@ -17,25 +16,16 @@ export const UsersOverview = () => {
         setSelectedUserRowDara({ user, rowId });
     };
 
-    const handleAddUserAddressClick = () => {
-        console.log('Add user clicked');
-    };
-
     const handleUserReset = () => setSelectedUserRowDara(null);
 
     return (
-        <>
+        <div className="flex flex-col gap-4">
             <UserTable
                 selectedUserRowId={selectedUserRowData?.rowId}
                 onUserClick={handleUserClick}
                 resetSelectedForAddressOverviewUser={handleUserReset}
             />
-            <TableLayout
-                tableTitle="User Addresses"
-                buttonConfig={{ text: 'Add address', onClick: handleAddUserAddressClick }}
-            >
-                <UserAddressTable userId={selectedUserRowData?.user.id} />
-            </TableLayout>
-        </>
+            <UserAddressTable userId={selectedUserRowData?.user.id} />
+        </div>
     );
 };

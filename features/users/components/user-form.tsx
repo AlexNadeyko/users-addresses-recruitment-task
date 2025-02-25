@@ -5,7 +5,7 @@ import { Form } from '@/lib/components/ui/form';
 import { FormInput } from '@/lib/components/shared/form-input';
 import { UserFormFields, UserSchema } from '@/features/users/schemas/user-schema';
 import { ActionButton } from '@/lib/components/shared/action-button';
-import { getUserInitials } from '@/features/users/utils/get-use-initials';
+import { getUserInitials } from '@/features/users/utils/get-user-initials';
 
 export type UserFormProps = {
     buttonText?: string;

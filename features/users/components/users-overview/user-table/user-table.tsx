@@ -67,6 +67,8 @@ export const UserTable = ({
         [setCurrentTableAction, setSelectedTableItem],
     );
 
+    const handleAddUserClick = () => setCurrentTableAction(ActionType.ADD);
+
     const handleUserDelete = async () => {
         if (!selectedTableItem) {
             return;
@@ -93,8 +95,6 @@ export const UserTable = ({
             setIsSubmitting(false);
         }
     };
-
-    const handleAddUserClick = () => setCurrentTableAction(ActionType.ADD);
 
     const handleAddUserFormSubmit = async (values: UserFormFields) => {
         try {

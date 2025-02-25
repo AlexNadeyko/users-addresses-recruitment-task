@@ -4,7 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { DEFAULT_PAGINATION_SIZE } from '@/lib/constants/pagination-size';
 import { AddressType } from '@/features/users/types/user';
 import { UserFormFields } from '@/features/users/schemas/user-schema';
-import { getUserInitials } from '@/features/users/utils/get-use-initials';
+import { getUserInitials } from '@/features/users/utils/get-user-initials';
+import { UserAddressFormFields } from '@/features/users/schemas/user-address-schema';
 
 export const getPaginatedUsers = async ({ page }: { page: number }) => {
     const [totalCount, data] = await prisma.$transaction([
@@ -73,6 +74,41 @@ export const deleteUser = async ({ userId }: { userId: number }) => {
     });
 };
 
+export const addUserAddress = async ({
+    userAddressFormFields,
+    userId,
+}: {
+    userAddressFormFields: UserAddressFormFields;
+    userId: number;
+}) => {
+    await prisma.userAddress.create({
+        data: { ...userAddressFormFields, validFrom: new Date(), userId },
+    });
+};
+
+export const updateUserAddress = async ({
+    userId,
+    userAddressFormFields,
+    validFrom,
+    addressType,
+}: {
+    userId: number;
+    userAddressFormFields: UserAddressFormFields;
+    validFrom: Date;
+    addressType: AddressType;
+}) => {
+    await prisma.userAddress.update({
+        where: {
+            userId_addressType_validFrom: {
+                userId,
+                addressType,
+                validFrom,
+            },
+        },
+        data: { ...userAddressFormFields, validFrom: new Date() },
+    });
+};
+
 export const deleteUserAddress = async ({
     userId,
     addressType,
@@ -80,14 +116,13 @@ export const deleteUserAddress = async ({
 }: {
     userId: number;
     addressType: AddressType;
-    validFrom: string;
+    validFrom: Date;
 }) => {
     await prisma.userAddress.delete({
         where: {
             userId_addressType_validFrom: {
                 addressType,
-                // TODO:
-                validFrom: validFrom.replace('T', ' ').replace('Z', ''),
+                validFrom,
                 userId,
             },
         },

@@ -11,16 +11,24 @@ import {
     DropdownMenuTrigger,
 } from '@/lib/components/ui/dropdown-menu';
 import { Button } from '@/lib/components/ui/button';
+import { AddressType } from '@/features/users/types/user';
+import { Badge } from '@/lib/components/ui/badge';
+import { USER_ADDRESS_TYPE_LABEL } from '@/features/users/constants/user-address-type-label';
 
-export type UserAddressTable = Pick<
-    UserAddress,
-    'addressType' | 'street' | 'city' | 'buildingNumber' | 'countryCode' | 'postCode'
->;
-
-export const userAddressTableColumns: ColumnDef<UserAddressTable>[] = [
+export const getUserAddressTableColumns: ({
+    onEditClick,
+    onDeleteClick,
+}: {
+    onDeleteClick: (address: UserAddress, rowId: string) => void;
+    onEditClick: (user: UserAddress, rowId: string) => void;
+}) => ColumnDef<UserAddress>[] = ({ onDeleteClick, onEditClick }) => [
     {
         accessorKey: 'addressType',
         header: 'Address Type',
+        cell: ({ row }) => {
+            const addressType = row.getValue<AddressType>('addressType');
+            return <Badge>{USER_ADDRESS_TYPE_LABEL[addressType]}</Badge>;
+        },
     },
     {
         accessorKey: 'countryCode',
@@ -56,12 +64,12 @@ export const userAddressTableColumns: ColumnDef<UserAddressTable>[] = [
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => console.log(address.addressType)}>
+                        <DropdownMenuItem onClick={() => onEditClick(address, row.id)}>
                             Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             variant="destructive"
-                            onClick={() => console.log(address.addressType)}
+                            onClick={() => onDeleteClick(address, row.id)}
                         >
                             Delete
                         </DropdownMenuItem>
