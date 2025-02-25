@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getPaginatedUsers } from '@/server-queries/users';
+import { getPaginatedUsers } from '@/data/server-queries/users';
 
 export async function GET(req: Request) {
     try {

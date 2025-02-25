@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 
-import { QueryKeys } from '@/client-queries/constants/query-keys';
-import { FIVE_MINS_IN_MILLIS } from '@/client-queries/constants/stale-time';
+import { QueryKeys } from '@/data/client-queries/constants/query-keys';
+import { FIVE_MINS_IN_MILLIS } from '@/data/client-queries/constants/stale-time';
 
 async function fetchPaginatedUsers({ page }: { page: number }) {
     const res = await fetch(`/api/users?page=${page}`, { method: 'GET' });

@@ -6,6 +6,7 @@ import { FormInput } from '@/lib/components/shared/form-input';
 import { UserFormFields, UserSchema } from '@/features/users/schemas/user-schema';
 import { ActionButton } from '@/lib/components/shared/action-button';
 import { PersonInitials } from '@/lib/components/shared/person-initials';
+import { FormButtonWrapper } from '@/lib/components/shared/form-button-wrapper';
 
 export type UserFormProps = {
     buttonText?: string;
@@ -39,9 +40,11 @@ export const UserForm = ({
                 <FormInput control={form.control} name="lastName" label="Last name" />
                 <PersonInitials firstName={firstName} lastName={lastName} />
                 <FormInput control={form.control} name="email" label="Email" />
-                <ActionButton type="submit" isSubmitting={isSubmitting}>
-                    {buttonText}
-                </ActionButton>
+                <FormButtonWrapper>
+                    <ActionButton type="submit" isSubmitting={isSubmitting}>
+                        {buttonText}
+                    </ActionButton>
+                </FormButtonWrapper>
             </form>
         </Form>
     );

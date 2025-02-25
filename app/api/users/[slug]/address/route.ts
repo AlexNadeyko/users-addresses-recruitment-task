@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-import { getPaginatedUserAddresses } from '@/server-queries/users';
+import { getPaginatedUserAddresses } from '@/data/server-queries/users';
 
 export async function GET(req: Request, { params }: { params: Promise<{ slug: string }> }) {
     try {

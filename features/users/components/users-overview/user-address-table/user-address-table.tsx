@@ -5,20 +5,20 @@ import { toast } from 'sonner';
 
 import { DataTable } from '@/lib/components/shared/data-table/data-table';
 import { useTablePagination } from '@/lib/hooks/useTablePagination';
-import { useGetPaginatedUserAddresses } from '@/client-queries/users/useGetPaginatedUserAddresses';
+import { useGetPaginatedUserAddresses } from '@/data/client-queries/users/useGetPaginatedUserAddresses';
 import { UserAddress } from '@prisma/client';
 import { ActionType, useTableActions } from '@/lib/hooks/useTableActions';
 import { AppAlertDialog } from '@/lib/components/shared/app-alert-dialog';
-import { addUserAddress, deleteUserAddress, updateUserAddress } from '@/actions/users';
+import { addUserAddress, deleteUserAddress, updateUserAddress } from '@/data/actions/users';
 import { AddressType } from '@/features/users/types/user';
 import { TableLayout } from '@/lib/components/layout/table-layout';
 import { queryClient } from '@/lib/providers/queryClient';
-import { QueryKeys } from '@/client-queries/constants/query-keys';
+import { QueryKeys } from '@/data/client-queries/constants/query-keys';
 import { UserAddressFormDialog } from '@/features/users/components/user-address-form-dialog';
 import { FormMode } from '@/lib/constants/form-mode';
 import { UserAddressFormFields } from '@/features/users/schemas/user-address-schema';
 import { getUserAddressTableColumns } from './user-address-table-columns';
-import { ActionResponseStatus } from '@/actions/action-response';
+import { ActionResponseStatus } from '@/data/actions/action-response';
 
 type UserAddressTableProps = {
     userId?: number;

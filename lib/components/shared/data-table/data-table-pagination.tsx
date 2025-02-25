@@ -12,7 +12,9 @@ export const DataTablePagination = <TableData,>({ table }: DataTablePaginationPr
         <div className="flex justify-between items-center">
             {totalCount ? (
                 <div className="text-sm font-medium text-zinc-700">Total count: {totalCount}</div>
-            ) : null}
+            ) : (
+                <div />
+            )}
 
             <div className="flex justify-end items-center gap-4">
                 {table.getRowModel().rows?.length ? (

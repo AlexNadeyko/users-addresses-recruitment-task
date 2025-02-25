@@ -5,19 +5,19 @@ import { toast } from 'sonner';
 
 import { DataTable } from '@/lib/components/shared/data-table/data-table';
 import { useTablePagination } from '@/lib/hooks/useTablePagination';
-import { useGetPaginatedUsers } from '@/client-queries/users/useGetPaginatedUsers';
+import { useGetPaginatedUsers } from '@/data/client-queries/users/useGetPaginatedUsers';
 import { ActionType, useTableActions } from '@/lib/hooks/useTableActions';
 import { AppAlertDialog } from '@/lib/components/shared/app-alert-dialog';
 import { User } from '@prisma/client';
-import { addUser, deleteUser, updateUser } from '@/actions/users';
+import { addUser, deleteUser, updateUser } from '@/data/actions/users';
 import { getUserTableColumns } from './user-table-columns';
 import { queryClient } from '@/lib/providers/queryClient';
-import { QueryKeys } from '@/client-queries/constants/query-keys';
+import { QueryKeys } from '@/data/client-queries/constants/query-keys';
 import { UserFormDialog } from '@/features/users/components/user-form-dialog';
 import { TableLayout } from '@/lib/components/layout/table-layout';
 import { FormMode } from '@/lib/constants/form-mode';
 import { UserFormFields } from '@/features/users/schemas/user-schema';
-import { ActionResponseStatus } from '@/actions/action-response';
+import { ActionResponseStatus } from '@/data/actions/action-response';
 
 type UserTableProps = {
     selectedUserRowId?: string;

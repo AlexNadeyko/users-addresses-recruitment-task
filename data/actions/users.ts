@@ -6,7 +6,7 @@ import { UserFormFields } from '@/features/users/schemas/user-schema';
 import { getUserInitials } from '@/features/users/utils/get-user-initials';
 import { UserAddressFormFields } from '@/features/users/schemas/user-address-schema';
 import { Prisma } from '@prisma/client';
-import { ActionResponseStatus } from '@/actions/action-response';
+import { ActionResponseStatus } from '@/data/actions/action-response';
 
 export const addUser = async (userFormFields: UserFormFields) => {
     try {
