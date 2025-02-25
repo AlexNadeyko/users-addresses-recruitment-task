@@ -1,22 +1,23 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 
 import { DataTable } from '@/lib/components/shared/data-table/data-table';
 import { useTablePagination } from '@/lib/hooks/useTablePagination';
-import { useGetPaginatedUsers } from '@/queries/users/useGetPaginatedUsers';
+import { useGetPaginatedUsers } from '@/client-queries/users/useGetPaginatedUsers';
 import { ActionType, useTableActions } from '@/lib/hooks/useTableActions';
 import { AppAlertDialog } from '@/lib/components/shared/app-alert-dialog';
 import { User } from '@prisma/client';
 import { addUser, deleteUser, updateUser } from '@/actions/users';
 import { getUserTableColumns } from './user-table-columns';
 import { queryClient } from '@/lib/providers/queryClient';
-import { QueryKeys } from '@/queries/constants/query-keys';
+import { QueryKeys } from '@/client-queries/constants/query-keys';
 import { UserFormDialog } from '@/features/users/components/user-form-dialog';
 import { TableLayout } from '@/lib/components/layout/table-layout';
 import { FormMode } from '@/lib/constants/form-mode';
 import { UserFormFields } from '@/features/users/schemas/user-schema';
+import { ActionResponseStatus } from '@/actions/action-response';
 
 type UserTableProps = {
     selectedUserRowId?: string;
@@ -24,6 +25,7 @@ type UserTableProps = {
     resetSelectedForAddressOverviewUser: () => void;
 };
 
+// TODO: to move logic to a hook
 export const UserTable = ({
     selectedUserRowId,
     onUserClick,
@@ -47,9 +49,16 @@ export const UserTable = ({
         data: paginatedUsers,
         isLoading: isPaginatedUsersLoading,
         refetch: refetchPaginatedUsers,
+        error: paginatedUsersError,
     } = useGetPaginatedUsers({
         pageIndex,
     });
+
+    useEffect(() => {
+        if (paginatedUsersError) {
+            toast.error(paginatedUsersError.message || 'Something went wrong while fetching users');
+        }
+    }, [paginatedUsersError]);
 
     const handleUserDeleteClick = useCallback(
         (user: User) => {
@@ -75,19 +84,25 @@ export const UserTable = ({
         }
         try {
             setIsSubmitting(true);
+
             const { id } = selectedTableItem;
 
-            await deleteUser({
+            const { status, error } = await deleteUser({
                 userId: id,
             });
 
-            toast.success('The user was deleted');
-            await refetchPaginatedUsers();
-            await queryClient.invalidateQueries({
-                queryKey: [QueryKeys.USERS, QueryKeys.USER_ADDRESSES],
-            });
-            cancelTableAction();
-            resetSelectedForAddressOverviewUser();
+            if (status === ActionResponseStatus.SUCCESS) {
+                toast.success('The user was deleted');
+                await refetchPaginatedUsers();
+                await queryClient.invalidateQueries({
+                    queryKey: [QueryKeys.USERS, QueryKeys.USER_ADDRESSES],
+                });
+                cancelTableAction();
+                resetSelectedForAddressOverviewUser();
+                return;
+            }
+
+            toast.error(error);
         } catch (error) {
             console.error(error);
             toast.error('Something went wrong while deleting the user');
@@ -99,16 +114,27 @@ export const UserTable = ({
     const handleAddUserFormSubmit = async (values: UserFormFields) => {
         try {
             setIsSubmitting(true);
-            await addUser(values);
-            toast.success('The user was added');
-            await refetchPaginatedUsers();
-            await queryClient.invalidateQueries({
-                queryKey: [QueryKeys.USERS],
-            });
-            cancelTableAction();
+
+            const { status, error } = await addUser(values);
+
+            if (status === ActionResponseStatus.SUCCESS) {
+                toast.success('The user was added');
+                await refetchPaginatedUsers();
+                await queryClient.invalidateQueries({
+                    queryKey: [QueryKeys.USERS],
+                });
+                cancelTableAction();
+                return;
+            }
+
+            toast.error(error);
         } catch (error) {
             console.error(error);
-            toast.error('Something went wrong while adding the user');
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : 'Something went wrong while adding the user',
+            );
         } finally {
             setIsSubmitting(false);
         }
@@ -120,16 +146,27 @@ export const UserTable = ({
         }
         try {
             setIsSubmitting(true);
-            await updateUser({ userId: selectedTableItem.id, userFormFields: values });
-            toast.success('The user was updated');
-            await refetchPaginatedUsers();
-            await queryClient.invalidateQueries({
-                queryKey: [QueryKeys.USERS, pageIndex],
+
+            const { status, error } = await updateUser({
+                userId: selectedTableItem.id,
+                userFormFields: values,
             });
-            cancelTableAction();
+
+            if (status === ActionResponseStatus.SUCCESS) {
+                toast.success('The user was updated');
+                await refetchPaginatedUsers();
+                cancelTableAction();
+                return;
+            }
+
+            toast.error(error);
         } catch (error) {
             console.error(error);
-            toast.error('Something went wrong while updating the user');
+            toast.error(
+                error instanceof Error
+                    ? error.message
+                    : 'Something went wrong while updating the user',
+            );
         } finally {
             setIsSubmitting(false);
         }
@@ -154,7 +191,7 @@ export const UserTable = ({
                 }
                 defaultValues={selectedTableItem || undefined}
                 isSubmitting={isSubmitting}
-                onOpenChange={() => setCurrentTableAction(null)}
+                onOpenChange={cancelTableAction}
                 onSubmit={
                     currentTableAction === ActionType.ADD
                         ? handleAddUserFormSubmit

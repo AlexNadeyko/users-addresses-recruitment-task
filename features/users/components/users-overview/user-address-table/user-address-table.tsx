@@ -1,11 +1,11 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 
 import { DataTable } from '@/lib/components/shared/data-table/data-table';
 import { useTablePagination } from '@/lib/hooks/useTablePagination';
-import { useGetPaginatedUserAddresses } from '@/queries/users/useGetPaginatedUserAddresses';
+import { useGetPaginatedUserAddresses } from '@/client-queries/users/useGetPaginatedUserAddresses';
 import { UserAddress } from '@prisma/client';
 import { ActionType, useTableActions } from '@/lib/hooks/useTableActions';
 import { AppAlertDialog } from '@/lib/components/shared/app-alert-dialog';
@@ -13,16 +13,18 @@ import { addUserAddress, deleteUserAddress, updateUserAddress } from '@/actions/
 import { AddressType } from '@/features/users/types/user';
 import { TableLayout } from '@/lib/components/layout/table-layout';
 import { queryClient } from '@/lib/providers/queryClient';
-import { QueryKeys } from '@/queries/constants/query-keys';
+import { QueryKeys } from '@/client-queries/constants/query-keys';
 import { UserAddressFormDialog } from '@/features/users/components/user-address-form-dialog';
 import { FormMode } from '@/lib/constants/form-mode';
 import { UserAddressFormFields } from '@/features/users/schemas/user-address-schema';
 import { getUserAddressTableColumns } from './user-address-table-columns';
+import { ActionResponseStatus } from '@/actions/action-response';
 
 type UserAddressTableProps = {
     userId?: number;
 };
 
+// TODO: to move logic to a hook
 export const UserAddressTable = ({ userId }: UserAddressTableProps) => {
     const { paginationState, handlePaginationChange } = useTablePagination();
 
@@ -42,10 +44,20 @@ export const UserAddressTable = ({ userId }: UserAddressTableProps) => {
         data: paginatedUserAddressesData,
         isLoading: isPaginatedUserAddressesLoading,
         refetch: refetchPaginatedUserAddresses,
+        error: paginatedUserAddressesError,
     } = useGetPaginatedUserAddresses({
         pageIndex,
         userId,
     });
+
+    useEffect(() => {
+        if (paginatedUserAddressesError) {
+            toast.error(
+                paginatedUserAddressesError.message ||
+                    'Something went wrong while fetching user addresses',
+            );
+        }
+    }, [paginatedUserAddressesError]);
 
     const handleUserAddressDeleteClick = useCallback(
         (address: UserAddress) => {
@@ -71,18 +83,26 @@ export const UserAddressTable = ({ userId }: UserAddressTableProps) => {
         }
         try {
             setIsSubmitting(true);
+
             const { userId, addressType, validFrom } = selectedTableItem;
-            await deleteUserAddress({
+
+            const { status, error } = await deleteUserAddress({
                 addressType: addressType as AddressType,
                 userId,
                 validFrom,
             });
-            toast.success('The address was deleted');
-            await refetchPaginatedUserAddresses();
-            await queryClient.invalidateQueries({
-                queryKey: [QueryKeys.USER_ADDRESSES],
-            });
-            cancelTableAction();
+
+            if (status === ActionResponseStatus.SUCCESS) {
+                toast.success('The address was deleted');
+                await refetchPaginatedUserAddresses();
+                await queryClient.invalidateQueries({
+                    queryKey: [QueryKeys.USER_ADDRESSES],
+                });
+                cancelTableAction();
+                return;
+            }
+
+            toast.error(error);
         } catch (error) {
             console.error(error);
             toast.error('Something went wrong while deleting the address');
@@ -97,16 +117,23 @@ export const UserAddressTable = ({ userId }: UserAddressTableProps) => {
         }
         try {
             setIsSubmitting(true);
-            await addUserAddress({
+
+            const { status, error } = await addUserAddress({
                 userAddressFormFields: values,
                 userId,
             });
-            toast.success('The address was added');
-            await refetchPaginatedUserAddresses();
-            await queryClient.invalidateQueries({
-                queryKey: [QueryKeys.USER_ADDRESSES],
-            });
-            cancelTableAction();
+
+            if (status === ActionResponseStatus.SUCCESS) {
+                toast.success('The address was added');
+                await refetchPaginatedUserAddresses();
+                await queryClient.invalidateQueries({
+                    queryKey: [QueryKeys.USER_ADDRESSES],
+                });
+                cancelTableAction();
+                return;
+            }
+
+            toast.error(error);
         } catch (error) {
             console.error(error);
             toast.error('Something went wrong while adding the address');
@@ -121,18 +148,22 @@ export const UserAddressTable = ({ userId }: UserAddressTableProps) => {
         }
         try {
             setIsSubmitting(true);
-            await updateUserAddress({
+
+            const { status, error } = await updateUserAddress({
                 userId,
                 userAddressFormFields: values,
                 validFrom: selectedTableItem.validFrom,
                 addressType: selectedTableItem.addressType as AddressType,
             });
-            toast.success('The address was updated');
-            await refetchPaginatedUserAddresses();
-            await queryClient.invalidateQueries({
-                queryKey: [QueryKeys.USER_ADDRESSES, pageIndex],
-            });
-            cancelTableAction();
+
+            if (status === ActionResponseStatus.SUCCESS) {
+                toast.success('The address was updated');
+                await refetchPaginatedUserAddresses();
+                cancelTableAction();
+                return;
+            }
+
+            toast.error(error);
         } catch (error) {
             console.error(error);
             toast.error('Something went wrong while updating the address');
@@ -171,7 +202,7 @@ export const UserAddressTable = ({ userId }: UserAddressTableProps) => {
                 }
                 defaultValues={(selectedTableItem as UserAddressFormFields) || undefined}
                 isSubmitting={isSubmitting}
-                onOpenChange={() => setCurrentTableAction(null)}
+                onOpenChange={cancelTableAction}
                 onSubmit={
                     currentTableAction === ActionType.ADD
                         ? handleAddUserAddressFormSubmit
