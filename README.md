@@ -1,3 +1,6 @@
+## Hosting
+https://users-addresses-recruitment-task.vercel.app/
+
 ## Intructions
 
 ### Environment variables
