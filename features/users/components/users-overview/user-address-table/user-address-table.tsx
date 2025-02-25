@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
-import { DataTable } from '@/lib/components/shared/data-table';
+import { DataTable } from '@/lib/components/shared/data-table/data-table';
 import { useTablePagination } from '@/lib/hooks/useTablePagination';
 import { useGetPaginatedUserAddresses } from '@/queries/users/useGetPaginatedUserAddresses';
 import { UserAddress } from '@prisma/client';

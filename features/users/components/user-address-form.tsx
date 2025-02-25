@@ -11,6 +11,7 @@ import {
 import { AddressType } from '@/features/users/types/user';
 import { FormSelect } from '@/lib/components/shared/form-select';
 import { USER_ADDRESS_TYPE_OPTIONS } from '@/features/users/constants/user-address-type-options';
+import { AddressPreview } from '@/lib/components/shared/address-preview';
 
 export type UserAddressFormProps = {
     buttonText?: string;
@@ -58,12 +59,7 @@ export const UserAddressForm = ({
                 <FormInput control={form.control} name="postCode" label="Post code" />
                 <FormInput control={form.control} name="city" label="City" />
                 <FormInput control={form.control} name="countryCode" label="Country code" />
-                <div>
-                    <span>Address: </span>
-                    <p>{`${street} ${buildingNumber}`}</p>
-                    <p>{`${postCode} ${city}`}</p>
-                    <p>{countryCode}</p>
-                </div>
+                <AddressPreview address={{ city, street, buildingNumber, countryCode, postCode }} />
                 <ActionButton type="submit" isSubmitting={isSubmitting}>
                     {buttonText}
                 </ActionButton>

@@ -19,7 +19,7 @@ import {
 } from '@/lib/components/ui/table';
 import { Button } from '@/lib/components/ui/button';
 import { PaginationState } from '@/lib/types/pagination';
-import { DataTablePagination } from '@/lib/components/shared/data-table-pagination';
+import { DataTablePagination } from '@/lib/components/shared/data-table/data-table-pagination';
 
 type DataTableProps<TData, TValue> = {
     columns?: ColumnDef<TData, TValue>[];

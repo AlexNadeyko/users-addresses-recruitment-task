@@ -3,7 +3,7 @@
 import { useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
-import { DataTable } from '@/lib/components/shared/data-table';
+import { DataTable } from '@/lib/components/shared/data-table/data-table';
 import { useTablePagination } from '@/lib/hooks/useTablePagination';
 import { useGetPaginatedUsers } from '@/queries/users/useGetPaginatedUsers';
 import { ActionType, useTableActions } from '@/lib/hooks/useTableActions';

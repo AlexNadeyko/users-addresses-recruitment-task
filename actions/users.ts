@@ -45,8 +45,11 @@ export const getPaginatedUserAddresses = async ({
 
 export const addUser = async (userFormFields: UserFormFields) => {
     const { firstName, lastName, email } = userFormFields;
+
+    const initials = firstName ? getUserInitials(firstName, lastName) : null;
+
     await prisma.user.create({
-        data: { firstName, lastName, email, initials: getUserInitials(firstName, lastName) },
+        data: { firstName, lastName, email, initials },
     });
 };
 
@@ -58,11 +61,14 @@ export const updateUser = async ({
     userFormFields: UserFormFields;
 }) => {
     const { firstName, lastName, email } = userFormFields;
+
+    const initials = firstName ? getUserInitials(firstName, lastName) : null;
+
     await prisma.user.update({
         where: {
             id: userId,
         },
-        data: { firstName, lastName, email, initials: getUserInitials(firstName, lastName) },
+        data: { firstName, lastName, email, initials },
     });
 };
 

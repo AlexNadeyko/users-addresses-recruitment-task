@@ -1,2 +1,2 @@
-export const getUserInitials = (firstName: string | null, lastName: string) =>
-    firstName ? `${firstName[0] || ''}${lastName[0] || ''}` : null;
+export const getUserInitials = (firstName: string, lastName: string) =>
+    `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase();
