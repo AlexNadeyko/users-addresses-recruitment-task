@@ -5,15 +5,17 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier . --write",
-    "migrate": "npx prisma migrate dev",
-    "generate-prisma-client": "npx prisma generate"
+    "migrate": "prisma migrate dev",
+    "generate-prisma-client": "prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.0",
     "@prisma/client": "^6.4.0",
+    "@prisma/extension-accelerate": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-dialog": "^1.1.6",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
