@@ -1,176 +1,38 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
-import { toast } from 'sonner';
+import { useMemo } from 'react';
 
-import { DataTable } from '@/lib/components/shared/data-table/data-table';
-import { useTablePagination } from '@/lib/hooks/useTablePagination';
-import { useGetPaginatedUserAddresses } from '@/data/client-queries/users/useGetPaginatedUserAddresses';
-import { UserAddress } from '@prisma/client';
-import { ActionType, useTableActions } from '@/lib/hooks/useTableActions';
+import { ActionType } from '@/lib/hooks/useTableActions';
 import { AppAlertDialog } from '@/lib/components/shared/app-alert-dialog';
-import { addUserAddress, deleteUserAddress, updateUserAddress } from '@/data/actions/users';
-import { AddressType } from '@/features/users/types/user';
 import { TableLayout } from '@/lib/components/layout/table-layout';
-import { queryClient } from '@/lib/providers/queryClient';
-import { QueryKeys } from '@/data/client-queries/constants/query-keys';
 import { UserAddressFormDialog } from '@/features/users/components/user-address-form-dialog';
 import { FormMode } from '@/lib/constants/form-mode';
+import { DataTable } from '@/lib/components/shared/data-table/data-table';
 import { UserAddressFormFields } from '@/features/users/schemas/user-address-schema';
 import { getUserAddressTableColumns } from './user-address-table-columns';
-import { ActionResponseStatus } from '@/data/actions/action-response';
+import { useUserAddressTable } from './use-user-address-table';
 
 type UserAddressTableProps = {
     userId?: number;
 };
 
-// TODO: to move logic to a hook
 export const UserAddressTable = ({ userId }: UserAddressTableProps) => {
-    const { paginationState, handlePaginationChange } = useTablePagination();
-
     const {
-        currentTableAction,
+        paginatedUserAddressesData,
+        paginationState: { pageIndex, pageSize },
         selectedTableItem,
+        currentTableAction,
+        isPaginatedUserAddressesLoading,
         isSubmitting,
-        setCurrentTableAction,
-        setSelectedTableItem,
-        setIsSubmitting,
         cancelTableAction,
-    } = useTableActions<UserAddress>();
-
-    const { pageIndex, pageSize } = paginationState;
-
-    const {
-        data: paginatedUserAddressesData,
-        isLoading: isPaginatedUserAddressesLoading,
-        refetch: refetchPaginatedUserAddresses,
-        error: paginatedUserAddressesError,
-    } = useGetPaginatedUserAddresses({
-        pageIndex,
-        userId,
-    });
-
-    useEffect(() => {
-        if (paginatedUserAddressesError) {
-            toast.error(
-                paginatedUserAddressesError.message ||
-                    'Something went wrong while fetching user addresses',
-            );
-        }
-    }, [paginatedUserAddressesError]);
-
-    const handleUserAddressDeleteClick = useCallback(
-        (address: UserAddress) => {
-            setCurrentTableAction(ActionType.DELETE);
-            setSelectedTableItem(address);
-        },
-        [setCurrentTableAction, setSelectedTableItem],
-    );
-
-    const handleUserAddressEditClick = useCallback(
-        (address: UserAddress) => {
-            setCurrentTableAction(ActionType.UPDATE);
-            setSelectedTableItem(address);
-        },
-        [setCurrentTableAction, setSelectedTableItem],
-    );
-
-    const handleAddUserAddressClick = () => setCurrentTableAction(ActionType.ADD);
-
-    const handleUserAddressDelete = async () => {
-        if (!selectedTableItem) {
-            return;
-        }
-        try {
-            setIsSubmitting(true);
-
-            const { userId, addressType, validFrom } = selectedTableItem;
-
-            const { status, error } = await deleteUserAddress({
-                addressType: addressType as AddressType,
-                userId,
-                validFrom,
-            });
-
-            if (status === ActionResponseStatus.SUCCESS) {
-                toast.success('The address was deleted');
-                await refetchPaginatedUserAddresses();
-                await queryClient.invalidateQueries({
-                    queryKey: [QueryKeys.USER_ADDRESSES],
-                });
-                cancelTableAction();
-                return;
-            }
-
-            toast.error(error);
-        } catch (error) {
-            console.error(error);
-            toast.error('Something went wrong while deleting the address');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleAddUserAddressFormSubmit = async (values: UserAddressFormFields) => {
-        if (!userId) {
-            return;
-        }
-        try {
-            setIsSubmitting(true);
-
-            const { status, error } = await addUserAddress({
-                userAddressFormFields: values,
-                userId,
-            });
-
-            if (status === ActionResponseStatus.SUCCESS) {
-                toast.success('The address was added');
-                await refetchPaginatedUserAddresses();
-                await queryClient.invalidateQueries({
-                    queryKey: [QueryKeys.USER_ADDRESSES],
-                });
-                cancelTableAction();
-                return;
-            }
-
-            toast.error(error);
-        } catch (error) {
-            console.error(error);
-            toast.error('Something went wrong while adding the address');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleUpdateUserAddressFormSubmit = async (values: UserAddressFormFields) => {
-        if (!userId || !selectedTableItem) {
-            return;
-        }
-        try {
-            setIsSubmitting(true);
-
-            const { status, error } = await updateUserAddress({
-                userId,
-                userAddressFormFields: values,
-                validFrom: selectedTableItem.validFrom,
-                addressType: selectedTableItem.addressType as AddressType,
-            });
-
-            if (status === ActionResponseStatus.SUCCESS) {
-                toast.success('The address was updated');
-                await refetchPaginatedUserAddresses();
-                cancelTableAction();
-                return;
-            }
-
-            toast.error(error);
-        } catch (error) {
-            console.error(error);
-            toast.error('Something went wrong while updating the address');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+        handleUserAddressDeleteClick,
+        handleUserAddressEditClick,
+        handleUpdateUserAddressFormSubmit,
+        handleAddUserAddressClick,
+        handleAddUserAddressFormSubmit,
+        handleUserAddressDelete,
+        handlePaginationChange,
+    } = useUserAddressTable({ userId });
 
     const columns = useMemo(
         () =>

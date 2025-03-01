@@ -1,23 +1,16 @@
 'use client';
 
-import { useCallback, useEffect, useMemo } from 'react';
-import { toast } from 'sonner';
+import { useMemo } from 'react';
 
 import { DataTable } from '@/lib/components/shared/data-table/data-table';
-import { useTablePagination } from '@/lib/hooks/useTablePagination';
-import { useGetPaginatedUsers } from '@/data/client-queries/users/useGetPaginatedUsers';
-import { ActionType, useTableActions } from '@/lib/hooks/useTableActions';
+import { ActionType } from '@/lib/hooks/useTableActions';
 import { AppAlertDialog } from '@/lib/components/shared/app-alert-dialog';
 import { User } from '@prisma/client';
-import { addUser, deleteUser, updateUser } from '@/data/actions/users';
-import { getUserTableColumns } from './user-table-columns';
-import { queryClient } from '@/lib/providers/queryClient';
-import { QueryKeys } from '@/data/client-queries/constants/query-keys';
 import { UserFormDialog } from '@/features/users/components/user-form-dialog';
 import { TableLayout } from '@/lib/components/layout/table-layout';
 import { FormMode } from '@/lib/constants/form-mode';
-import { UserFormFields } from '@/features/users/schemas/user-schema';
-import { ActionResponseStatus } from '@/data/actions/action-response';
+import { getUserTableColumns } from './user-table-columns';
+import { useUserTable } from './use-user-table';
 
 type UserTableProps = {
     selectedUserRowId?: string;
@@ -25,152 +18,29 @@ type UserTableProps = {
     resetSelectedForAddressOverviewUser: () => void;
 };
 
-// TODO: to move logic to a hook
 export const UserTable = ({
     selectedUserRowId,
     onUserClick,
     resetSelectedForAddressOverviewUser,
 }: UserTableProps) => {
-    const { paginationState, handlePaginationChange } = useTablePagination();
-
     const {
-        currentTableAction,
+        paginationState,
+        paginatedUsers,
         selectedTableItem,
+        currentTableAction,
+        isPaginatedUsersLoading,
         isSubmitting,
-        setCurrentTableAction,
-        setSelectedTableItem,
-        setIsSubmitting,
+        handleUserEditClick,
+        handleUserDeleteClick,
         cancelTableAction,
-    } = useTableActions<User>();
+        handleUserDelete,
+        handleAddUserFormSubmit,
+        handleUpdateUserFormSubmit,
+        handleAddUserClick,
+        handlePaginationChange,
+    } = useUserTable({ resetSelectedForAddressOverviewUser });
 
     const { pageIndex, pageSize } = paginationState;
-
-    const {
-        data: paginatedUsers,
-        isLoading: isPaginatedUsersLoading,
-        refetch: refetchPaginatedUsers,
-        error: paginatedUsersError,
-    } = useGetPaginatedUsers({
-        pageIndex,
-    });
-
-    useEffect(() => {
-        if (paginatedUsersError) {
-            toast.error(paginatedUsersError.message || 'Something went wrong while fetching users');
-        }
-    }, [paginatedUsersError]);
-
-    const handleUserDeleteClick = useCallback(
-        (user: User) => {
-            setCurrentTableAction(ActionType.DELETE);
-            setSelectedTableItem(user);
-        },
-        [setCurrentTableAction, setSelectedTableItem],
-    );
-
-    const handleUserEditClick = useCallback(
-        (user: User) => {
-            setCurrentTableAction(ActionType.UPDATE);
-            setSelectedTableItem(user);
-        },
-        [setCurrentTableAction, setSelectedTableItem],
-    );
-
-    const handleAddUserClick = () => setCurrentTableAction(ActionType.ADD);
-
-    const handleUserDelete = async () => {
-        if (!selectedTableItem) {
-            return;
-        }
-        try {
-            setIsSubmitting(true);
-
-            const { id } = selectedTableItem;
-
-            const { status, error } = await deleteUser({
-                userId: id,
-            });
-
-            if (status === ActionResponseStatus.SUCCESS) {
-                toast.success('The user was deleted');
-                await refetchPaginatedUsers();
-                await queryClient.invalidateQueries({
-                    queryKey: [QueryKeys.USERS, QueryKeys.USER_ADDRESSES],
-                });
-                cancelTableAction();
-                resetSelectedForAddressOverviewUser();
-                return;
-            }
-
-            toast.error(error);
-        } catch (error) {
-            console.error(error);
-            toast.error('Something went wrong while deleting the user');
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleAddUserFormSubmit = async (values: UserFormFields) => {
-        try {
-            setIsSubmitting(true);
-
-            const { status, error } = await addUser(values);
-
-            if (status === ActionResponseStatus.SUCCESS) {
-                toast.success('The user was added');
-                await refetchPaginatedUsers();
-                await queryClient.invalidateQueries({
-                    queryKey: [QueryKeys.USERS],
-                });
-                cancelTableAction();
-                return;
-            }
-
-            toast.error(error);
-        } catch (error) {
-            console.error(error);
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : 'Something went wrong while adding the user',
-            );
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleUpdateUserFormSubmit = async (values: UserFormFields) => {
-        if (!selectedTableItem) {
-            return;
-        }
-        try {
-            setIsSubmitting(true);
-
-            const { status, error } = await updateUser({
-                userId: selectedTableItem.id,
-                userFormFields: values,
-            });
-
-            if (status === ActionResponseStatus.SUCCESS) {
-                toast.success('The user was updated');
-                await refetchPaginatedUsers();
-                cancelTableAction();
-                return;
-            }
-
-            toast.error(error);
-        } catch (error) {
-            console.error(error);
-            toast.error(
-                error instanceof Error
-                    ? error.message
-                    : 'Something went wrong while updating the user',
-            );
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
 
     const columns = useMemo(
         () =>
